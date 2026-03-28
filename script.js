@@ -845,8 +845,6 @@ const contactForm = document.querySelector('.contact-form');
 
 if (contactForm) {
     contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-
         const button = contactForm.querySelector('button');
         const originalText = button.innerHTML;
 
@@ -854,21 +852,12 @@ if (contactForm) {
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         button.disabled = true;
 
-        // Simulate sending (replace with actual form submission)
+        // Let Netlify handle the form submission
+        // It will redirect after success, but we can still show feedback
         setTimeout(() => {
             button.innerHTML = '<i class="fas fa-check"></i> Sent Successfully!';
             button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-
-            // Reset form
-            contactForm.reset();
-
-            // Reset button after delay
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.style.background = '';
-                button.disabled = false;
-            }, 3000);
-        }, 1500);
+        }, 500);
     });
 
     // Input focus animations
