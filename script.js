@@ -841,83 +841,95 @@ const initStaggerAnimation = () => {
 };
 
 // ========== EMAILJS INITIALIZATION ==========
-window.addEventListener('load', () => {
+const initEmailJS = () => {
     if (typeof emailjs !== 'undefined') {
         emailjs.init('a2JDLWALhdQGuuytc');
+        setupContactForm();
+    } else {
+        setTimeout(initEmailJS, 100);
     }
-});
+};
 
 // ========== CONTACT FORM ==========
-const contactForm = document.querySelector('#contactForm');
+const setupContactForm = () => {
+    const contactForm = document.querySelector('#contactForm');
 
-if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
+    if (contactForm) {
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
 
-        const button = contactForm.querySelector('button');
-        const originalText = button.innerHTML;
+            const button = contactForm.querySelector('button');
+            const originalText = button.innerHTML;
 
-        // Animate button
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-        button.disabled = true;
+            // Animate button
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            button.disabled = true;
 
-        // Get form data
-        const formData = {
-            name: contactForm.querySelector('input[name="name"]').value,
-            email: contactForm.querySelector('input[name="email"]').value,
-            company: contactForm.querySelector('input[name="company"]').value,
-            message: contactForm.querySelector('textarea[name="message"]').value
-        };
+            // Get form data
+            const formData = {
+                name: contactForm.querySelector('input[name="name"]').value,
+                email: contactForm.querySelector('input[name="email"]').value,
+                company: contactForm.querySelector('input[name="company"]').value,
+                message: contactForm.querySelector('textarea[name="message"]').value
+            };
 
-        // Send via EmailJS
-        emailjs.send('service_gqjsx9e', 'template_mris0ed', {
-            from_name: formData.name,
-            from_email: formData.email,
-            company: formData.company,
-            message: formData.message,
-            to_email: 'mustafakhaled985@gmail.com'
-        })
-        .then(() => {
-            button.innerHTML = '<i class="fas fa-check"></i> Sent Successfully!';
-            button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            // Send via EmailJS
+            emailjs.send('service_gqjsx9e', 'template_mris0ed', {
+                from_name: formData.name,
+                from_email: formData.email,
+                company: formData.company,
+                message: formData.message,
+                to_email: 'mustafakhaled985@gmail.com'
+            })
+            .then(() => {
+                button.innerHTML = '<i class="fas fa-check"></i> Sent Successfully!';
+                button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
 
-            // Reset form
-            contactForm.reset();
+                // Reset form
+                contactForm.reset();
 
-            // Reset button after delay
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.style.background = '';
-                button.disabled = false;
-            }, 3000);
-        })
-        .catch((error) => {
-            button.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error! Try again';
-            button.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
-            console.error('EmailJS Error:', error);
+                // Reset button after delay
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = '';
+                    button.disabled = false;
+                }, 3000);
+            })
+            .catch((error) => {
+                button.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error! Try again';
+                button.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                console.error('EmailJS Error:', error);
 
-            // Reset button
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.style.background = '';
-                button.disabled = false;
-            }, 3000);
-        });
-    });
-
-    // Input focus animations
-    const inputs = contactForm.querySelectorAll('input, textarea');
-    inputs.forEach(input => {
-        input.addEventListener('focus', () => {
-            input.parentElement.classList.add('focused');
+                // Reset button
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = '';
+                    button.disabled = false;
+                }, 3000);
+            });
         });
 
-        input.addEventListener('blur', () => {
-            if (!input.value) {
-                input.parentElement.classList.remove('focused');
-            }
+        // Input focus animations
+        const inputs = contactForm.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('focused');
+            });
+
+            input.addEventListener('blur', () => {
+                if (!input.value) {
+                    input.parentElement.classList.remove('focused');
+                }
+            });
         });
-    });
+    }
+};
+
+// Initialize EmailJS when document is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEmailJS);
+} else {
+    initEmailJS();
 }
 
 // ========== RIPPLE EFFECT ==========
