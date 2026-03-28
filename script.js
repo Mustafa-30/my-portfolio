@@ -841,7 +841,11 @@ const initStaggerAnimation = () => {
 };
 
 // ========== EMAILJS INITIALIZATION ==========
-emailjs.init('a2JDLWALhdQGuuytc');
+window.addEventListener('load', () => {
+    if (typeof emailjs !== 'undefined') {
+        emailjs.init('a2JDLWALhdQGuuytc');
+    }
+});
 
 // ========== CONTACT FORM ==========
 const contactForm = document.querySelector('#contactForm');
