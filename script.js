@@ -840,11 +840,16 @@ const initStaggerAnimation = () => {
     }
 };
 
+// ========== EMAILJS INITIALIZATION ==========
+emailjs.init('a2JDLWALhdQGuuytc');
+
 // ========== CONTACT FORM ==========
-const contactForm = document.querySelector('.contact-form');
+const contactForm = document.querySelector('#contactForm');
 
 if (contactForm) {
     contactForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
         const button = contactForm.querySelector('button');
         const originalText = button.innerHTML;
 
@@ -852,12 +857,48 @@ if (contactForm) {
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         button.disabled = true;
 
-        // Let Netlify handle the form submission
-        // It will redirect after success, but we can still show feedback
-        setTimeout(() => {
+        // Get form data
+        const formData = {
+            name: contactForm.querySelector('input[name="name"]').value,
+            email: contactForm.querySelector('input[name="email"]').value,
+            company: contactForm.querySelector('input[name="company"]').value,
+            message: contactForm.querySelector('textarea[name="message"]').value
+        };
+
+        // Send via EmailJS
+        emailjs.send('service_gqjsx9e', 'template_contact', {
+            from_name: formData.name,
+            from_email: formData.email,
+            company: formData.company,
+            message: formData.message,
+            to_email: 'mustafakhaled985@gmail.com'
+        })
+        .then(() => {
             button.innerHTML = '<i class="fas fa-check"></i> Sent Successfully!';
             button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-        }, 500);
+
+            // Reset form
+            contactForm.reset();
+
+            // Reset button after delay
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '';
+                button.disabled = false;
+            }, 3000);
+        })
+        .catch((error) => {
+            button.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error! Try again';
+            button.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+            console.error('EmailJS Error:', error);
+
+            // Reset button
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '';
+                button.disabled = false;
+            }, 3000);
+        });
     });
 
     // Input focus animations
