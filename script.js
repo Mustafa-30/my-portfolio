@@ -870,7 +870,7 @@ if (contactForm) {
         };
 
         // Send via EmailJS
-        emailjs.send('service_gqjsx9e', 'template_contact', {
+        emailjs.send('service_gqjsx9e', 'template_mris0ed', {
             from_name: formData.name,
             from_email: formData.email,
             company: formData.company,
