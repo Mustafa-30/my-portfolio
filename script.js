@@ -841,9 +841,13 @@ const initStaggerAnimation = () => {
 };
 
 // ========== EMAILJS INITIALIZATION ==========
+let emailjsReady = false;
+
 const initEmailJS = () => {
     if (typeof emailjs !== 'undefined') {
         emailjs.init('a2JDLWALhdQGuuytc');
+        emailjsReady = true;
+        console.log('EmailJS initialized successfully');
     } else {
         setTimeout(initEmailJS, 100);
     }
@@ -853,7 +857,10 @@ const initEmailJS = () => {
 const setupContactForm = () => {
     const contactForm = document.getElementById('contactForm');
 
-    if (!contactForm) return;
+    if (!contactForm) {
+        console.log('Contact form not found');
+        return;
+    }
 
     // Prevent default form submission
     contactForm.addEventListener('submit', function(e) {
@@ -863,60 +870,76 @@ const setupContactForm = () => {
         const button = contactForm.querySelector('button');
         const originalText = button.innerHTML;
 
-        // Animate button
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-        button.disabled = true;
+        // Check if EmailJS is ready
+        if (!emailjsReady || typeof emailjs === 'undefined') {
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing...';
+            button.disabled = true;
 
-        // Get form data
-        const name = contactForm.querySelector('input[name="name"]').value;
-        const email = contactForm.querySelector('input[name="email"]').value;
-        const company = contactForm.querySelector('input[name="company"]').value;
-        const message = contactForm.querySelector('textarea[name="message"]').value;
-
-        // Wait for EmailJS to be ready
-        if (typeof emailjs === 'undefined') {
-            button.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error loading...';
+            // Wait and retry
             setTimeout(() => {
-                button.innerHTML = originalText;
-                button.disabled = false;
-            }, 2000);
+                if (emailjsReady && typeof emailjs !== 'undefined') {
+                    submitForm();
+                } else {
+                    button.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error! Refresh page';
+                    button.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.style.background = '';
+                        button.disabled = false;
+                    }, 3000);
+                }
+            }, 500);
             return;
         }
 
-        // Send via EmailJS
-        emailjs.send('service_gqjsx9e', 'template_mris0ed', {
-            from_name: name,
-            from_email: email,
-            company: company,
-            message: message,
-            to_email: 'mustafakhaled985@gmail.com'
-        })
-        .then(function(response) {
-            button.innerHTML = '<i class="fas fa-check"></i> Sent Successfully!';
-            button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        submitForm();
 
-            // Reset form
-            contactForm.reset();
+        function submitForm() {
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            button.disabled = true;
 
-            // Reset button after delay
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.style.background = '';
-                button.disabled = false;
-            }, 3000);
-        })
-        .catch(function(error) {
-            console.error('EmailJS Error:', error);
-            button.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error! Try again';
-            button.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+            // Get form data
+            const name = contactForm.querySelector('input[name="name"]').value;
+            const email = contactForm.querySelector('input[name="email"]').value;
+            const company = contactForm.querySelector('input[name="company"]').value;
+            const message = contactForm.querySelector('textarea[name="message"]').value;
 
-            // Reset button
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.style.background = '';
-                button.disabled = false;
-            }, 3000);
-        });
+            // Send via EmailJS
+            emailjs.send('service_gqjsx9e', 'template_mris0ed', {
+                from_name: name,
+                from_email: email,
+                company: company,
+                message: message,
+                to_email: 'mustafakhaled985@gmail.com'
+            })
+            .then(function(response) {
+                console.log('Email sent successfully');
+                button.innerHTML = '<i class="fas fa-check"></i> Sent Successfully!';
+                button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+
+                // Reset form
+                contactForm.reset();
+
+                // Reset button after delay
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = '';
+                    button.disabled = false;
+                }, 3000);
+            })
+            .catch(function(error) {
+                console.error('EmailJS Error:', error);
+                button.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error! Try again';
+                button.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+
+                // Reset button
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = '';
+                    button.disabled = false;
+                }, 3000);
+            });
+        }
 
         return false;
     }, false);
@@ -934,6 +957,8 @@ const setupContactForm = () => {
             }
         });
     });
+
+    console.log('Contact form setup complete');
 };
 
 // Initialize form listener immediately
@@ -943,12 +968,8 @@ if (document.readyState === 'loading') {
     setupContactForm();
 }
 
-// Initialize EmailJS separately
-if (document.readyState === 'loading') {
-    window.addEventListener('load', initEmailJS);
-} else {
-    initEmailJS();
-}
+// Initialize EmailJS in background
+initEmailJS();
 
 // ========== RIPPLE EFFECT ==========
 const createRipple = (event, element) => {
